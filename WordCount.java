@@ -100,7 +100,7 @@ public class WordCount implements Runnable {
 	public static void main(String args[]) throws java.io.IOException {
     		int chunkSize = 0;
 		int numThreads = 0;
-		File readFile = null;
+		File readFile = new File(args[0]);
 		if (args.length < 3) { //check if right amount of args was entered.
        			System.out.println("Usage: java <file|directory> <chunk size 10-5000> <num of threads 1-100>");
            		System.exit(1);
@@ -118,8 +118,19 @@ public class WordCount implements Runnable {
 			
 		ExecutorService pool = Executors.newFixedThreadPool(numThreads);
 		BufferedReader reader = null;
-		try{
-			reader = new BufferedReader(new FileReader(args[0]));
+		File[] listOfFiles = null;
+		/*
+        if (readFile.isDirectory())
+			//System.out.println("this is working");
+			listOfFiles = readFile.listFiles();
+
+			for (int i = 0; i < listOfFiles.length; i++) {
+  				File file = listOfFiles[i];
+ 		 		if (file.isFile()) {
+    				
+		*/
+        try{
+			reader = new BufferedReader(new FileReader(readFile));
 		}catch(IOException e){
 			System.out.println("Usage: java <file|directory> <chunk size 10-5000> <num of threads 1-100>");
 			System.exit(0);
@@ -127,7 +138,7 @@ public class WordCount implements Runnable {
 		ConcurrentMap<String,Integer> m = new ConcurrentHashMap<String,Integer>();
         	String leftover = ""; // in case a string broken in half
         	while (true) {
-            		String res = readFileAsString(reader,chunkSize);
+            		String res = readFileAsString(reader,chunkSize).toLowerCase().replaceAll("[^A-Za-z0-9 ]", ""); //clean up input
             		if (res.equals("")) {
                 		if (!leftover.equals("")) 
                     			new WordCount(leftover,m).run();
@@ -145,7 +156,8 @@ public class WordCount implements Runnable {
             		System.out.println("Pool interrupted!");
             		System.exit(1);
         	}
-
+		//}
+		//}
 		File dir; //output directory
     		File file; //results.txt file
 		BufferedWriter out;
